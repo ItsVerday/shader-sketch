@@ -1,6 +1,7 @@
 import Uniform from "./Uniform";
 import Utils from "./Utils";
 import Import from "./Imports";
+import Texture from "./Texture";
 
 const DEFAULT_VERTEX_SHADER =
 `attribute vec2 position;
@@ -14,12 +15,15 @@ const DEFAULT_FRAGMENT_SHADER =
 	gl_FragColor = vec4(gl_FragCoord.xy / viewportSize, 0., 1.);
 }`;
 
+const TEXTURE_NAMES = [ "TEXTURE0", "TEXTURE1", "TEXTURE2", "TEXTURE3", "TEXTURE4", "TEXTURE5", "TEXTURE6", "TEXTURE7" ];
+
 class ShaderSketch {
     constructor(element) {
         this.element = element;
         this.gl = element.canvasElt.getContext("webgl");
         
         this.uniforms = [];
+        this.textures = [];
         this.imports = [];
         
         this.program = null;
@@ -43,9 +47,14 @@ class ShaderSketch {
     
     getExtraFragmentCode() {
         let code = `precision highp float;`;
-        for (let uniform of this.uniforms) {
+        for (let uniform of this.getUniforms()) {
             code += `
 ${uniform.getUniformDeclaration()}`;
+        }
+
+        for (let texture of this.textures) {
+            code += `
+${texture.getUniformDeclaration()}`;
         }
 
         code += Import.resolveCode(this.imports.map(name => Import.getImport(name)));
@@ -70,10 +79,14 @@ ${uniform.getUniformDeclaration()}`;
             return;
         }
         
-        for (let uniform of this.uniforms) {
+        for (let uniform of this.getUniforms()) {
             uniform.loadUniformLocation(this.gl, this.program);
         }
-     }
+
+        for (let texture of this.textures) {
+            texture.loadUniformLocation(this.gl, this.program);
+        }
+    }
     
     canRender() {
         if (this.program == null) {
@@ -96,9 +109,11 @@ ${uniform.getUniformDeclaration()}`;
         this.setUniform("frameCount", this.frameCount);
         this.setUniform("timeElapsed", (new Date() - this.startTime) / 1000);
         
-        for (let uniform of this.uniforms) {
+        for (let uniform of this.getUniforms()) {
             uniform.setUniformValue(this.gl);
         }
+
+        this.bindTextures();
         
         this.gl.clearColor(0, 0, 0, 1);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
@@ -120,6 +135,33 @@ ${uniform.getUniformDeclaration()}`;
         this.gl.useProgram(this.program);
         this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
     }
+
+    bindTextures() {
+        let textureNumber = 0;
+        
+        for (let texture of this.textures) {
+            if (textureNumber > TEXTURE_NAMES.length) {
+                break;
+            }
+
+            let textureName = this.gl[TEXTURE_NAMES[textureNumber]];
+
+            this.gl.activeTexture(textureName);
+            this.gl.bindTexture(this.gl.TEXTURE_2D, texture.texture);
+            this.gl.uniform1i(texture.location, textureNumber);
+            textureNumber++;
+        }
+    }
+
+    getUniforms() {
+        let uniforms = this.uniforms;
+
+        for (let texture of this.textures) {
+            uniforms = [...uniforms, ...texture.uniforms];
+        }
+
+        return uniforms;
+    }
     
     addUniform(name, type, ...values) {
         this.uniforms.push(new Uniform(name, type, ...values));
@@ -128,7 +170,7 @@ ${uniform.getUniformDeclaration()}`;
     }
     
     getUniform(name) {
-        for (let uniform of this.uniforms) {
+        for (let uniform of this.getUniforms()) {
             if (uniform.name == name) {
                 return uniform;
             }
@@ -142,6 +184,32 @@ ${uniform.getUniformDeclaration()}`;
         
         if (uniform != null) {
             uniform.setValue(...values);
+        }
+    }
+
+    addTexture(...args) {
+        let texture = new Texture(...args);
+        texture.bindTexture(this.gl);
+
+        this.textures.push(texture);
+    }
+
+    getTexture(name) {
+        for (let texture of this.textures) {
+            if (texture.name == name) {
+                return texture;
+            }
+        }
+
+        return null;
+    }
+
+    deleteTexture(name) {
+        let texture = this.getTexture(name);
+        
+        if (texture != null) {
+            texture.unbindTexture(this.gl);
+            this.textures.splice(this.textures.indexOf(texture), 1);
         }
     }
 }

@@ -29,6 +29,7 @@ class ShaderSketchElement extends HTMLElement {
         this.shadow.appendChild(this.canvasElt);
 
         this.mounted = false;
+        this.loadingTextures = [];
         
         this.fragmentShaderElt = null;
     }
@@ -57,8 +58,6 @@ class ShaderSketchElement extends HTMLElement {
             this.setUniform("mousePosition", this.getMousePosition(evt));
             this.setUniform("mouseState", 0);
         };
-
-        this.updateChildren();
         
         this.render();
     }
@@ -72,38 +71,74 @@ class ShaderSketchElement extends HTMLElement {
         this.onmouseup = null;
     }
     
-    updateChildren() {
-        this.fragmentShaderElt = null;
-
-        let imports = [];
-        
-        for (let child of this.childNodes) {
-            let tagName = child.tagName;
-
-            if (tagName == "FRAGMENT-SHADER") {
-                this.fragmentShaderElt = child;
-            }
+    updateChild({ child, add }) {
+        switch (child.tagName.toLowerCase()) {
+            case "fragment-shader":
+                this.fragmentShaderElt = add ? child : null;
+                break;
             
-            if (tagName == "SHADER-UNIFORM") {
-                let name = child.getAttribute("name");
-                let type = child.getAttribute("type");
-                let value = child.getAttribute("value");
-                
-                if (this.getUniform(name) == null) {
-                    this.addUniform(name, type, value);
-                } else {
-                    this.setUniform(name, value);
+            case "shader-uniform":
+                if (!add) {
+                    break;
                 }
-            }
+                
+                {
+                    let name = child.getAttribute("name");
+                    let type = child.getAttribute("type");
+                    let value = child.getAttribute("value");
+                    
+                    if (this.getUniform(name) == null) {
+                        this.addUniform(name, type, value);
+                    } else {
+                        this.setUniform(name, value);
+                    }
+                }
 
-            if (tagName == "SHADER-IMPORT") {
-                let name = child.getAttribute("name");
-                imports.push(name);
-            }
+                break;
+            
+            case "shader-import":
+                {
+                    let name = child.getAttribute("name");
+
+                    if (add) {
+                        this.shaderSketch.imports.push(name);
+                    } else {
+                        this.shaderSketch.imports.splice(this.shaderSketch.imports.indexOf(name), -1);
+                    }
+                }
+
+                break;
+            
+            case "shader-texture":
+                {
+                    let name = child.getAttribute("name");
+                    let src = child.getAttribute("src");
+                    let blending = child.getAttribute("blending");
+                    let wrapping = child.getAttribute("wrapping");
+
+                    if (add) {
+                        if (this.shaderSketch.getTexture(name) == null && this.loadingTextures.indexOf(name) == -1) {
+                            this.loadingTextures.push(name);
+
+                            const image = new Image();
+                            image.onload = () => {
+                                this.shaderSketch.addTexture(name, image, { blending, wrapping });
+                                this.shaderSketch.shouldCompileProgram = true;
+
+                                this.loadingTextures.splice(this.loadingTextures.indexOf(name), 1);
+                            }
+
+                            image.src = src;
+                        }
+                    } else {
+                        this.shaderSketch.deleteTexture(name);
+                    }
+                }
+
+                break;
         }
         
         this.shaderSketch.shouldCompileProgram = true;
-        this.shaderSketch.imports = imports;
     }
     
     render() {
