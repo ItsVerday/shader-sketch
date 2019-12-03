@@ -1,16 +1,27 @@
 import Uniform from "./Uniform";
 
 class Texture {
-    constructor(name, image, { blending = "linear", wrapping = "clamp" } = {}) {
+    constructor(name, image, { blending = "linear", wrapping = "clamp", update = false } = {}) {
         this.name = name;
         this.image = image;
 
         this.blending = blending || "linear";
         this.wrapping = wrapping || "clamp";
+        this.shouldUpdate = update || false;
+
+        this.resolutionUniform = new Uniform(`${this.name}_resolution`, "vec2", this.image.width, this.image.height);
 
         this.uniforms = [
-            new Uniform(`${this.name}_size`, "vec2", this.image.width, this.image.height)
+            this.resolutionUniform
         ];
+    }
+
+    update(gl) {
+        this.resolutionUniform.setValue(this.image.width, this.image.height);
+
+        if (this.shouldUpdate) {
+            this.bindTexture(gl);
+        }
     }
 
     getUniformDeclaration() {

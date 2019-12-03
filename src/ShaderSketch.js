@@ -78,7 +78,7 @@ ${texture.getUniformDeclaration()}`;
         if (this.program == null) {
             return;
         }
-        
+
         for (let uniform of this.getUniforms()) {
             uniform.loadUniformLocation(this.gl, this.program);
         }
@@ -108,13 +108,15 @@ ${texture.getUniformDeclaration()}`;
         this.frameCount++;
         this.setUniform("frameCount", this.frameCount);
         this.setUniform("timeElapsed", (new Date() - this.startTime) / 1000);
+
+        this.gl.useProgram(this.program);
+
+        this.bindTextures();
         
         for (let uniform of this.getUniforms()) {
             uniform.setUniformValue(this.gl);
         }
 
-        this.bindTextures();
-        
         this.gl.clearColor(0, 0, 0, 1);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
         
@@ -132,7 +134,6 @@ ${texture.getUniformDeclaration()}`;
             this.gl.enableVertexAttribArray(location);
         }
         
-        this.gl.useProgram(this.program);
         this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
     }
 
@@ -143,6 +144,8 @@ ${texture.getUniformDeclaration()}`;
             if (textureNumber > TEXTURE_NAMES.length) {
                 break;
             }
+
+            texture.update(this.gl);
 
             let textureName = this.gl[TEXTURE_NAMES[textureNumber]];
 

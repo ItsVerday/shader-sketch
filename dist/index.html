@@ -3,34 +3,19 @@
     <head>
         <title>Shader-Sketch</title>
         <style>
-            body {
-                margin: 0;
-                overflow: hidden;
-            }
-            
             shader-sketch {
-                width: 100vw;
-                height: 100vh;
+                width: 400px;
+                height: 400px;
             }
         </style>
     </head>
     <body>
-        <shader-sketch>
+        <shader-sketch id="shader-sketch">
             <fragment-shader>
                 void main() {
-                    vec3 position = vec3(gl_FragCoord.xy / min(viewportSize.x, viewportSize.y) * 2., timeElapsed * .15);
-                    vec3 curl = curl_fractal_simplex_noise_3d(position, 2);
-                    curl *= fractal_simplex_noise_3d(position, 3) * 1.5 + .5;
-                    
-                    vec3 finalPosition = position + curl;
-                    float noiseValue = fractal_simplex_noise_3d(finalPosition, 1) / 2. + .5;
-                    vec3 color = vec3(noiseValue * .2 - .05, 1., noiseValue * .75 + .1);
-                    gl_FragColor = vec4(HSLtoRGB(color), 1.);
+                    gl_FragColor = vec4(gl_FragCoord.xy / viewportSize, 1., 1.);
                 }
             </fragment-shader>
-
-            <shader-import name="simplex_noise_3d"></shader-import>
-            <shader-import name="color"></shader-import>
         </shader-sketch>
 
         <script src="shader-sketch.js"></script>

@@ -122,10 +122,7 @@ class ShaderSketchElement extends HTMLElement {
 
                             const image = new Image();
                             image.onload = () => {
-                                this.shaderSketch.addTexture(name, image, { blending, wrapping });
-                                this.shaderSketch.shouldCompileProgram = true;
-
-                                this.loadingTextures.splice(this.loadingTextures.indexOf(name), 1);
+                                this.addTexture(name, image, { blending, wrapping, update: false });
                             }
 
                             image.src = src;
@@ -136,6 +133,30 @@ class ShaderSketchElement extends HTMLElement {
                 }
 
                 break;
+
+            case "shader-canvas-texture":
+                {
+                    let name = child.getAttribute("name");
+                    let selector = child.getAttribute("selector");
+                    let blending = child.getAttribute("blending");
+                    let wrapping = child.getAttribute("wrapping");
+
+                    if (add) {
+                        let elt = document.querySelector(selector);
+
+                        if (elt == null) {
+                            break;
+                        }
+
+                        if (elt.tagName.toLowerCase() == "shader-sketch") {
+                            elt = elt.canvasElt;
+                        }
+
+                        this.addTexture(name, elt, { blending, wrapping, update: true });
+                    } else {
+                        this.shaderSketch.deleteTexture(name);
+                    }
+                }
         }
         
         this.shaderSketch.shouldCompileProgram = true;
@@ -186,6 +207,17 @@ class ShaderSketchElement extends HTMLElement {
     
     setUniform(...args) {
         this.shaderSketch.setUniform(...args);
+    }
+
+    addTexture(name, image, { blending, wrapping, update }) {
+        this.shaderSketch.addTexture(name, image, { blending, wrapping, update });
+        this.shaderSketch.shouldCompileProgram = true;
+
+        let index = this.loadingTextures.indexOf(name);
+
+        if (index > -1) {
+            this.loadingTextures.splice(this.loadingTextures.indexOf(name), 1);
+        }
     }
 }
 
