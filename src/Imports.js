@@ -1,11 +1,18 @@
-import ImportData from "./ImportData";
-
 const IMPORT_REGISTRY = {};
 
 class Import {
     constructor(name, code) {
         this.name = name;
         this.code = code;
+    }
+
+    getCode() {
+        return `// --------------------
+// Import: ${this.name}
+// --------------------
+
+${this.code}
+`;
     }
 
     static registerImport(name, code) {
@@ -41,12 +48,22 @@ class Import {
             }
         }
 
-        return finalImports.map(importInstance => importInstance.code).join("\n");
+        return finalImports.map(importInstance => importInstance.getCode()).join("\n");
     }
 }
 
-for (let name in ImportData) {
-    Import.registerImport(name, ImportData[name]);
+let context = require.context("./imports/", true, /.*/);
+
+for (let filename of context.keys()) {
+    let code = require(`./imports/${filename.substring(2)}`).default;
+
+    if (!filename.endsWith(".fsh")) {
+        code = JSON.parse(code);
+    }
+
+    filename = filename.replace("./", "").replace(".fsh", "");
+
+    IMPORT_REGISTRY[filename] = new Import(filename, code);
 }
 
 export default Import;

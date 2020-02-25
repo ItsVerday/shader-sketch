@@ -17,6 +17,12 @@ module.exports = {
             presets: ['@babel/preset-env']
           }
         }
+      },
+      {
+        include: path.resolve(__dirname, 'src/imports'),
+        use: {
+          loader: 'raw-loader'
+        }
       }
     ]
   }
