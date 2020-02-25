@@ -4,10 +4,10 @@ import Import from "./Imports";
 import Texture from "./Texture";
 
 const DEFAULT_VERTEX_SHADER =
-`attribute vec2 position;
+`attribute vec4 position;
 
 void main() {
-	gl_Position = vec4(position, 0., 1.);
+	gl_Position = position;
 }`;
 	
 const DEFAULT_FRAGMENT_SHADER =
