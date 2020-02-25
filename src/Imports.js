@@ -1,5 +1,19 @@
 const IMPORT_REGISTRY = {};
 
+function flattenArray(array) {
+    let flattened = [];
+
+    for (let value of array) {
+        if (value instanceof Array) {
+            flattened.push(...flattenArray(value));
+        } else {
+            flattened.push(value);
+        }
+    }
+
+    return flattened;
+}
+
 class Import {
     constructor(name, code) {
         this.name = name;
@@ -38,8 +52,7 @@ ${this.code}
     }
 
     static resolveCode(imports) {
-        imports = imports.map(importInstance => Import.resolveImports(importInstance));
-        imports = imports.flat(Infinity);
+        imports = flattenArray(imports.map(importInstance => Import.resolveImports(importInstance)));
         let finalImports = [];
 
         for (let importInstance of imports) {
