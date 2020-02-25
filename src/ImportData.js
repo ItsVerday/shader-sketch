@@ -2,6 +2,9 @@
 // COLOR FUNCTIONS FROM https://gist.github.com/yiwenl/745bfea7f04c456e0101 AND https://www.shadertoy.com/view/XljGzV
 
 export default {
+    __global__: `
+const float PI = 3.1415926535897932384626433832795;
+`,
     perlin_noise_2d: `
 vec4 perlin_noise_2d_permute(vec4 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
 vec2 perlin_noise_2d_fade(vec2 t) { return t*t*t*(t*(t*6.0-15.0)+10.0); }
@@ -367,7 +370,7 @@ float z = fractal_perlin_noise_4d(p + vec4(0., 0., DX, 0.), iterations) * 2. - 1
 float w = fractal_perlin_noise_4d(p + vec4(0., 0., 0., DX), iterations) * 2. - 1.;
 return normalize(vec4(v - x, v - y, v - x, v - w));
 }`,
-    perlin_noise: ["perlin_noise_2d", "perlin_noise_3d", "perlin_noise_4d"],
+    perlin_noise: [ "perlin_noise_2d", "perlin_noise_3d", "perlin_noise_4d" ],
     simplex_noise_2d: `
 vec3 simplex_noise_2d_permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
 
@@ -504,8 +507,8 @@ p3 *= norm.w;
 // Mix final noise value
 vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
 m = m * m;
-return 42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), 
-                            dot(p2,x2), dot(p3,x3) ) );
+return (42.0 * dot( m*m, vec4( dot(p0,x0), dot(p1,x1), 
+                            dot(p2,x2), dot(p3,x3) ) )) / 2. + .5;
 }
 
 float fractal_simplex_noise_3d(vec3 p, int iterations) {
@@ -680,8 +683,8 @@ float z = fractal_simplex_noise_4d(p + vec4(0., 0., DX, 0.), iterations) * 2. - 
 float w = fractal_simplex_noise_4d(p + vec4(0., 0., 0., DX), iterations) * 2. - 1.;
 return normalize(vec4(v - x, v - y, v - x, v - w));
 }`,
-    simplex_noise: ["simplex_noise_2d", "simplex_noise_3d", "simplex_noise_4d"],
-    noise: ["perlin_noise", "simplex_noise"],
+    simplex_noise: [ "simplex_noise_2d", "simplex_noise_3d", "simplex_noise_4d" ],
+    noise: [ "perlin_noise", "simplex_noise" ],
     color: `
 vec3 RGBtoHSV(vec3 rgb) {
  float Cmax = max(rgb.r, max(rgb.g, rgb.b));
@@ -753,8 +756,138 @@ vec3 RGBtoHSL(vec3 color) {
 }
 
 vec3 HSLtoRGB(vec3 c) {
-vec3 rgb = clamp( abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0, 0.0, 1.0);
+    vec3 rgb = clamp( abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),6.0)-3.0)-1.0, 0.0, 1.0);
 
-return c.z + c.y * (rgb-0.5)*(1.0-abs(2.0*c.z-1.0));
-}`
+    return c.z + c.y * (rgb-0.5)*(1.0-abs(2.0*c.z-1.0));
+}`,
+    sdf: `
+float sdf_sphere_basic(vec3 pos) {
+    return length(pos) - 1.;
+}
+
+float sdf_sphere(vec3 pos, vec3 center, float radius) {
+    return sdf_sphere_basic((pos - center) / radius) * radius;
+}
+
+float sdf_box_basic(vec3 pos, vec3 scale) {
+    vec3 q = abs(pos) - scale;
+    return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0);
+}
+
+float sdf_box(vec3 pos, vec3 a, vec3 b) {
+    vec3 diff = abs(a - b);
+    vec3 avg = (a + b) / 2.;
+
+    return sdf_box_basic(pos - avg, diff);
+}
+
+float sdf_plane(vec3 pos, vec4 n) {
+    return dot(pos, n.xyz) + n.w;
+}
+
+float sdf_union(float d1, float d2) {
+    return min(d1, d2);
+}
+
+float sdf_smooth_union(float d1, float d2, float k) {
+    float h = clamp(0.5 + 0.5 * (d2 - d1) / k, 0.0, 1.0);
+    return mix(d2, d1, h) - k * h * (1.0 - h);
+} 
+
+float sdf_intersection(float d1, float d2) {
+    return max(d1, d2);
+}
+
+float sdf_smooth_intersection(float d1, float d2, float k) {
+    float h = clamp(0.5 - 0.5 * (d2 - d1) / k, 0.0, 1.0);
+    return mix(d2, d1, h) + k * h * (1.0 - h);
+}
+
+float sdf_subtraction(float d1, float d2) {
+    return sdf_intersection(d1, -d2);
+}
+
+float sdf_smooth_subtraction(float d1, float d2, float k) {
+    float h = clamp(0.5 - 0.5 * (d2 + d1) / k, 0.0, 1.0);
+    return mix(d2, -d1, h) + k * h * (1.0 - h);
+}`,
+    __raymarch: `
+struct RayMarch {
+    int iterations;
+    int maxIterations;
+    vec3 position;
+    vec3 direction;
+    float epsilon;
+    bool finished;
+    bool hit;
+    float smallestDistance;
+    vec3 closestPosition;
+    float emission;
+};
+
+RayMarch create_raymarch(vec3 position, vec3 direction, int maxIterations) {
+    return RayMarch(0, maxIterations, position, direction, 0.0001, false, false, 999999999., vec3(0., 0., 0.), 0.);
+}
+
+RayMarch iterate_raymarch(RayMarch rayMarch, float sdf) {
+    rayMarch.iterations++;
+
+    if (sdf < rayMarch.epsilon) {
+        rayMarch.finished = true;
+        rayMarch.hit = true;
+        return rayMarch;
+    }
+
+    if (rayMarch.iterations > rayMarch.maxIterations) {
+        rayMarch.finished = true;
+        return rayMarch;
+    }
+
+    rayMarch.position += normalize(rayMarch.direction) * sdf;
+    float emission = 1. / (sdf + 1.);
+
+    if (rayMarch.emission < emission) {
+        rayMarch.emission = emission;
+    }
+
+    if (sdf < rayMarch.smallestDistance) {
+        rayMarch.smallestDistance = sdf;
+        rayMarch.closestPosition = rayMarch.position;
+    }
+    
+    return rayMarch;
+}
+
+vec3 raymarch_normal(float center, float x, float y, float z) {
+    return normalize(vec3(center - x, center - y, center - z));
+}
+
+float raymarch_ambient_occlusion(RayMarch rayMarch, float intensity) {
+    return pow(1. - intensity, float(rayMarch.iterations));
+}
+
+float raymarch_emission(RayMarch rayMarch, float limit, float intensity) {
+    return limit * intensity * (2. / (1. + exp(-rayMarch.emission / limit)) - 1.);
+}
+`,
+    camera: `
+vec3 camera_look(float yaw, float pitch, float fov, float aspectRatio, vec2 screenPos) {
+    screenPos = screenPos * 2. - 1.;
+    pitch = pitch * PI / 180.;
+    yaw = yaw * PI / 180.;
+
+    vec3 forward = vec3(cos(yaw) * cos(pitch), sin(pitch), sin(yaw) * cos(pitch));
+    vec3 up = vec3(cos(yaw) * cos(pitch + PI / 2.), sin(pitch + PI / 2.), sin(yaw) * cos(pitch + PI / 2.));
+    vec3 right = cross(forward, up);
+
+    screenPos.y /= aspectRatio;
+    float fovScale = tan(fov * PI / 180.);
+
+    up *= fovScale;
+    right *= fovScale;
+
+    return normalize(forward + right * screenPos.x + up * screenPos.y);
+}
+`,
+    raymarch: [ "sdf", "__raymarch" ]
 };

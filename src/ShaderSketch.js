@@ -24,7 +24,7 @@ class ShaderSketch {
         
         this.uniforms = [];
         this.textures = [];
-        this.imports = [];
+        this.imports = ["__global__"];
         
         this.program = null;
         this.shouldCompileProgram = true;
