@@ -110,15 +110,9 @@ class Uniform {
         if (UNIFORM_DATA_TYPES[type].int) {
             value = value.map(Math.floor);
         }
-        
+
         if (arrayLength > -1) {
-            let newArray = [];
-            
-            while (value.length > 0) {
-                newArray.push(value.splice(0, UNIFORM_DATA_TYPES[type].length));
-            }
-            
-            value = newArray;
+            value = [value];
         }
         
         return value;

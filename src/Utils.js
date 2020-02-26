@@ -44,10 +44,17 @@ Utils.loadShader = function(gl, type, source) {
     return shader;
 }
 
+Utils.removeAll = function(string, remove) {
+    let finalString = string;
+    remove.forEach(value => finalString = finalString.split(value).join(""));
+
+    return finalString;
+}
+
 Utils.parseUniformValues = function(...values) {
     if (typeof values[0] == "string") {
-        values[0] = values[0].replace(" ", "").replace("[", "").replace("]", "");
-        
+        values[0] = Utils.removeAll(values[0], [ " ", "[", "]" ]);
+
         values = values[0].split(",").map(parseFloat);
     }
     

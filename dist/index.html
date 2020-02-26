@@ -19,6 +19,8 @@
         <shader-sketch id="shader-sketch">
             <fragment-shader>
                 void main() {
+                    vec2 position = gl_FragCoord.xy / viewportSize;
+                    
                     gl_FragColor = vec4(gl_FragCoord.xy / viewportSize, 0., 1.);
                 }
             </fragment-shader>
