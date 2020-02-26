@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Shader-Sketch</title>
+        <style>
+            body {
+                overflow: hidden;
+                padding: 0;
+                margin: 0;
+            }
+
+            shader-sketch {
+                width: 100vw;
+                height: 100vh;
+            }
+        </style>
+    </head>
+    <body>
+        <shader-sketch id="shader-sketch">
+            <fragment-shader>
+                float scene(vec3 position, float offset) {
+                    float sphere = sdf_sphere(position, vec3(0., 0., 0.), 2.5);
+
+                    sphere += fractal_simplex_noise_4d(vec4(position, timeElapsed * .2 + offset), 1);
+
+                    return sphere;
+                }
+
+                float channel(float offset, vec3 look) {
+                    const int iterations = 64;
+
+                    RayMarch rayMarch = create_raymarch(vec3(0., 0., -5.), look, iterations);
+
+                    for (int i = 0; i &lt; iterations; i++) {
+                        if (rayMarch.finished) {
+                            break;
+                        }
+
+                        rayMarch = iterate_raymarch(rayMarch, scene(rayMarch.position, offset));
+                    }
+
+                    if (rayMarch.hit) {
+                        return pow(float(rayMarch.iterations) / 64., .8) - .1;
+                    }
+
+                    return rayMarch.smallestDistance / 2.;
+                }
+
+                void main() {
+                    vec2 pos = gl_FragCoord.xy / viewportSize;
+                    pos += curl_fractal_simplex_noise_3d(vec3(pos, timeElapsed * .1), 2).xy * .01;
+
+                    vec3 look = camera_look(90., 0., 100., viewportSize.x / viewportSize.y, pos);
+                    
+                    gl_FragColor = vec4(
+                        channel(0., look),
+                        channel(1000., look),
+                        channel(2000., look),
+                    1.);
+                }
+            </fragment-shader>
+            <shader-import name="raymarch"></shader-import>
+            <shader-import name="camera"></shader-import>
+            <shader-import name="simplex_noise_3d"></shader-import>
+            <shader-import name="simplex_noise_4d"></shader-import>
+        </shader-sketch>
+
+        <script src="../../dist/shader-sketch.js"></script>
+    </body>
+</html>
