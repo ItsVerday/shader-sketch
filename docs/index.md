@@ -1,4 +1,6 @@
-### Guides: [Getting Started](guides/getting-started)
+# Shader-Sketch - A user-friendly HTML element for writing fragment shaders in your HTML code.
+
+## Guides: [Getting Started](guides/getting-started) - [Using Uniforms](guides/using-uniforms)
 
 # What is shader-sketch?
 Shader-Sketch is a JavaScript library that allows you to write fragment shaders in the browser using user-friendly HTML elements.

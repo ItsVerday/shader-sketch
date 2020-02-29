@@ -4,7 +4,7 @@
 There are a few prerequisites for working with shader-sketch:
 - You should know how to work with HTML.
 - You need a code editor to work in. If you don't have one, [codepen.io](https://codepen.io/) works well as an online code editor.
-- It is highly reccomended that you know GLSL (The language shader-sketch uses for it's fragment shader code).
+- It is highly recommended that you know GLSL (The language shader-sketch uses for its fragment shader code).
 
 # Importing the shader-sketch library
 In order to use shader-sketch, you need to import the JavaScript library into your webpage. To do this, you need to add a script tag to your HTML:
@@ -40,9 +40,10 @@ In order to create a shader-sketch, you need to add a `<shader-sketch>` element 
 When the page loads, there should be a black, red, green, and yellow square on your website. If there is, you have set everything up correctly!
 
 # Editing the fragment-shader code
-You will see that there is an element inside of your shader-sketch called `<fragment-shader>`. This contains the GLSL code that runs on the GPU. The code in this element will run **once for every pixel on your canvas, every frame**. This means that this code is running hundreds of thousands, or even millions of times per second. This is all done on the GPU, so it runs fine (unless you write some intensive code).
+You will see that there is an element inside of your shader-sketch called `<fragment-shader>`. This contains the GLSL code that runs on the GPU. The code in this element will run *once for every pixel on your canvas, every frame*. This means that this code is running hundreds of thousands, or even millions of times per second. This is all done on the GPU, so it runs fine (unless you write some intensive code).
 
 Edit your `<fragment-shader>` to look like this:
+
 ```html
 <shader-sketch>
     <fragment-shader>
@@ -65,3 +66,5 @@ You just modified the shader-sketch! Upon reloading, the square should change co
 # Next steps
 - If you aren't familiar with GLSL, you should learn it. GLSL is essentially a requirement for working with shader-sketch.
 - If you want to know more of the theory about how to create shaders, [The Book of Shaders](https://thebookofshaders.com/) is an amazing website on how to write interestinng shaders. It includes techniques that will be very useful to you, working with shader-sketch.
+
+Next: [Using Uniforms](guides/using-uniforms)
