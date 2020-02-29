@@ -63,5 +63,5 @@ Edit your `<fragment-shader>` to look like this:
 You just modified the shader-sketch! Upon reloading, the square should change color smoothly. You see, changing the code inside of the `<fragment-shader>` tag changes what the shader-sketch looks like. You can write any valid GLSL code in this tag, and it will show up on the webpage!
 
 # Next steps
-- If you aren't familiar with GLSL, you should look into 
+- If you aren't familiar with GLSL, you should learn it. GLSL is essentially a requirement for working with shader-sketch.
 - If you want to know more of the theory about how to create shaders, [The Book of Shaders](https://thebookofshaders.com/) is an amazing website on how to write interestinng shaders. It includes techniques that will be very useful to you, working with shader-sketch.
