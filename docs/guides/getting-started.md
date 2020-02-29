@@ -1,4 +1,4 @@
-<script src="../../dist/shader-sketch.js"></script>
+<script src="../shader-sketch.js"></script>
 
 <shader-sketch>
     <fragment-shader>
