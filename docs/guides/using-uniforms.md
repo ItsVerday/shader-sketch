@@ -127,4 +127,4 @@ This will update the values of these uniforms, and your shader-sketch will updat
 - Become more familiar with uniforms. Use them to make your shader-sketch more flexible, or just to easily change a parameter.
 - Find interesting ways to use uniforms. What if you could use the arrow keys to move around in the shader-sketch? What if scrolling affected the shader-sketch?
 
-## Previous: [Getting Started](guides/getting-started)
+## Previous: [Getting Started](getting-started)

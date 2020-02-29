@@ -67,4 +67,4 @@ You just modified the shader-sketch! Upon reloading, the square should change co
 - If you aren't familiar with GLSL, you should learn it. GLSL is essentially a requirement for working with shader-sketch.
 - If you want to know more of the theory about how to create shaders, [The Book of Shaders](https://thebookofshaders.com/) is an amazing website on how to write interestinng shaders. It includes techniques that will be very useful to you, working with shader-sketch.
 
-## Next: [Using Uniforms](guides/using-uniforms)
+## Next: [Using Uniforms](using-uniforms)
