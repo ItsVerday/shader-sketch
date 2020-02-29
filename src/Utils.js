@@ -65,4 +65,91 @@ Utils.parseUniformValues = function(...values) {
     return values;
 }
 
+Utils.textWrap = function(context, text, textWrap) {
+    if (textWrap == Infinity) {
+        return {
+            lines: [text],
+            width: context.measureText(text).width
+        };
+    }
+
+    let lines = [""];
+    let maximumWidth = 0;
+    
+    for (let word of text.split(" ")) {
+        let testString = `${lines[lines.length - 1]} ${word}`.trim();
+
+        let { width } = context.measureText(testString);
+
+        if (width > textWrap && lines[lines.length - 1] != "") {
+            lines.push(word);
+
+            width = context.measureText(word).width;
+
+            if (width > maximumWidth) {
+                maximumWidth = width;
+            }
+        } else {
+            if (width > maximumWidth) {
+                maximumWidth = width;
+            }
+
+            lines[lines.length - 1] = testString;
+        }
+    }
+
+    return {
+        lines,
+        width: maximumWidth
+    };
+}
+
+Utils.determineFontHeight = function(fontStyle) {
+    let body = document.getElementsByTagName("body")[0];
+    let dummy = document.createElement("div");
+    let dummyText = document.createTextNode("M");
+    dummy.appendChild(dummyText);
+    dummy.setAttribute("style", fontStyle);
+    body.appendChild(dummy);
+    let result = dummy.offsetHeight;
+    body.removeChild(dummy);
+    return result;
+};
+
+Utils.generateTypographyCanvas = function({ text, fontSize, fontFamily, fontStyle, fontWeight, textWrap, textAlign, margin }) {
+    let canvas = document.createElement("canvas");
+    let context = canvas.getContext("2d");
+
+    let font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
+
+    context.textAlign = textAlign;
+
+    context.font = font;
+    let { lines, width } = Utils.textWrap(context, text, textWrap);
+    let fontHeight = Utils.determineFontHeight(`font: ${font};`);
+    let height = fontHeight * lines.length;
+
+    canvas.width = width + margin * 2;
+    canvas.height = height + margin * 2;
+
+    context.font = font;
+    context.textBaseline = "top";
+
+    context.fillStyle = "black";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    context.fillStyle = "white";
+
+    context.translate(0, canvas.height);
+    context.scale(1, -1);
+
+    let y = margin;
+    for (let line of lines) {
+        context.fillText(line, margin, y);
+        y += fontHeight;
+    }
+
+    return canvas;
+}
+
 export default Utils;

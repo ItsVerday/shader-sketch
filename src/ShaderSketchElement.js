@@ -1,4 +1,5 @@
 import ShaderSketch from "./ShaderSketch";
+import Utils from "./Utils";
 
 const STYLE =
 `:host {
@@ -157,6 +158,31 @@ class ShaderSketchElement extends HTMLElement {
                         this.shaderSketch.deleteTexture(name);
                     }
                 }
+
+                break;
+            case "shader-typography":
+                {
+                    let name = child.getAttribute("name");
+                    let text = child.textContent;
+                    let fontSize = parseFloat(child.getAttribute("font-size")) ?? 24;
+                    let fontFamily = child.getAttribute("font-family") ?? "sans-serif";
+                    let fontStyle = child.getAttribute("font-style") ?? "normal";
+                    let fontWeight = child.getAttribute("font-weight") ?? "normal";
+                    let textWrap = parseFloat(child.getAttribute("text-wrap")) ?? Infinity;
+                    let textAlign = child.getAttribute("text-align") ?? "center";
+                    let margin = parseFloat(child.getAttribute("margin")) ?? 0;
+                    let blending = child.getAttribute("blending");
+                    let wrapping = child.getAttribute("wrapping");
+
+                    if (add) {
+                        let canvas = Utils.generateTypographyCanvas({ text, fontSize, fontFamily, fontStyle, fontWeight, textWrap, textAlign, margin });
+                        this.addTexture(name, canvas, { blending, wrapping, update: false });
+                    } else {
+                        this.shaderSketch.deleteTexture(name);
+                    }
+                }
+
+                break;
         }
         
         this.shaderSketch.shouldCompileProgram = true;
