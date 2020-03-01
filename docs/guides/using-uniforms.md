@@ -1,3 +1,5 @@
+<script src="../shader-sketch.js"></script>
+
 # Prerequisites
 There are a few prerequisites for working with uniforms:
 - You should know how to work with HTML.
@@ -128,3 +130,5 @@ This will update the values of these uniforms, and your shader-sketch will updat
 - Find interesting ways to use uniforms. What if you could use the arrow keys to move around in the shader-sketch? What if scrolling affected the shader-sketch?
 
 ## Previous: [Getting Started](getting-started)
+
+## Next: [Using Imports](using-imports)
