@@ -37,7 +37,7 @@ This allows you to create this:
     <fragment-shader>
         void main() {
             vec2 position = gl_FragCoord.xy / viewportSize;
-            position /= 10.;
+            position *= 10.;
 
             float noise = perlin_noise_2d(position);
 
@@ -52,7 +52,7 @@ This allows you to create this:
     <fragment-shader>
         void main() {
             vec2 position = gl_FragCoord.xy / viewportSize;
-            position /= 10.;
+            position *= 10.;
 
             float noise = perlin_noise_2d(position);
 
