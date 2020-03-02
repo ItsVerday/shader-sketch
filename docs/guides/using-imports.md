@@ -41,7 +41,7 @@ This allows you to create this:
 
             float noise = perlin_noise_2d(position);
 
-            gl_FragColor = vec4(position, position, position, 1.);
+            gl_FragColor = vec4(noise, noise, noise, 1.);
         }
     </fragment-shader>
 
@@ -56,7 +56,7 @@ This allows you to create this:
 
             float noise = perlin_noise_2d(position);
 
-            gl_FragColor = vec4(position, position, position, 1.);
+            gl_FragColor = vec4(noise, noise, noise, 1.);
         }
     </fragment-shader>
 
