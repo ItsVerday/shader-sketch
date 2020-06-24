@@ -14,7 +14,9 @@
     "babel-loader": "^8.0.6",
     "raw-loader": "^4.0.0",
     "webpack": "^4.41.6",
-    "webpack-cli": "^3.3.11"
+    "webpack-cli": "^3.3.11",
+    "acorn": ">=6.4.1",
+    "minimist": ">=1.2.3"
   },
   "dependencies": {
     "regenerator-runtime": "^0.13.5"
