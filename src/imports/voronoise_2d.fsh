@@ -39,16 +39,18 @@ float fractal_voronoise_2d(vec2 p, float u, float v, int iterations) {
     float divide = 0.;
 
     float scale = 1.;
+    float invScale = 1.;
 
     for (int iter = 0; iter < 10; iter++) {
         if (iter >= iterations) {
             break;
         }
         
-        total += voronoise_2d(p / scale, u, v) * scale;
+        total += voronoise_2d(p * invScale, u, v) * scale;
         divide += scale;
         
         scale *= .4;
+        invScale *= 2.5;
     }
 
     return total / divide;

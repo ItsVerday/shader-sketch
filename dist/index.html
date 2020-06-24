@@ -16,20 +16,20 @@
     <body>
         <shader-sketch id="shader-sketch">
             <fragment-shader>
-                float marble_noise(vec2 position) {
-                    vec2 position_2 = position * 0.6;
-                    float d1 = max(1. - abs(fractal_voronoise_2d(position_2 + 100., u, v, 4) - fractal_voronoise_2d(position_2 + 200., u, v, 3)) * 3., 0.);
+                float marble_noise(vec3 position) {
+                    vec3 position_2 = position * 0.6;
+                    float d1 = max(1. - abs(fractal_voronoise_3d(position_2 + 100., u, v, 4) - fractal_voronoise_3d(position_2 + 200., u, v, 3)) * 3., 0.);
                     d1 = d1 * d1 * d1;
-                    d1 *= fractal_voronoise_2d(position_2 + 300., u, v, 2) * 0.3;
+                    d1 *= fractal_voronoise_3d(position_2 + 300., u, v, 2) * 0.3;
                 
-                    vec2 curl_1 = curl_fractal_voronoise_2d(position + 400., u, v, 3) * fractal_voronoise_2d(position + 500., u, v, 2) * 0.05;
+                    vec3 curl_1 = curl_fractal_voronoise_3d(position + 400., u, v, 3) * fractal_voronoise_3d(position + 500., u, v, 2) * 0.05;
                 
-                    vec2 position_3 = position * 1.2;
-                    float d2 = max(1. - abs(fractal_voronoise_2d(position_3 + curl_1 + 600., u, v, 4) - fractal_voronoise_2d(position_3 + curl_1 + 700., u, v, 3)) * 2., 0.);
+                    vec3 position_3 = position * 1.2;
+                    float d2 = max(1. - abs(fractal_voronoise_3d(position_3 + curl_1 + 600., u, v, 4) - fractal_voronoise_3d(position_3 + curl_1 + 700., u, v, 3)) * 2., 0.);
                     d2 = d2 * d2 * d2;
-                    d2 *= fractal_voronoise_2d(position_3 + 800., u, v, 2) * 0.5;
+                    d2 *= fractal_voronoise_3d(position_3 + 800., u, v, 2) * 0.5;
                 
-                    float value = 1. - fractal_voronoise_2d(position + 900., u, v, 5);
+                    float value = 1. - fractal_voronoise_3d(position + 900., u, v, 5);
                     value = 1. - value * value * value;
                 
                     return clamp(value - d1 - d2, 0., 1.);
@@ -37,7 +37,7 @@
 
                 void main() {
                     vec2 pos = gl_FragCoord.xy * .01;
-                    float value = marble_noise(pos + timeElapsed * 0.5);
+                    float value = marble_noise(vec3(pos, timeElapsed * 0.2));
 
                     gl_FragColor = vec4(value, value, value, 1.);
                 }
@@ -46,7 +46,7 @@
             <shader-uniform name="u" type="float" value="1"></shader-uniform>
             <shader-uniform name="v" type="float" value="0.3"></shader-uniform>
 
-            <shader-import name="voronoise_2d"></shader-import>
+            <shader-import name="voronoise"></shader-import>
         </shader-sketch>
 
         <script src="shader-sketch.js"></script>
