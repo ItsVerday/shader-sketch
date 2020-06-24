@@ -2,8 +2,12 @@ import ShaderSketchElement from "./ShaderSketchElement";
 
 class UpdateParentElement extends HTMLElement {
     connectedCallback() {
-        if (this.parentNode instanceof ShaderSketchElement) {
-            this.parent = this.parentNode;
+        this.update(this.parentNode);
+    }
+
+    update(parent) {
+        if (parent instanceof ShaderSketchElement) {
+            this.parent = parent;
             
             this.parent.updateChild({
                 child: this,

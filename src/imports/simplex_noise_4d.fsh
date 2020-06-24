@@ -112,21 +112,21 @@ float fractal_simplex_noise_4d(vec4 p, int iterations) {
 vec4 curl_simplex_noise_4d(vec4 p) {
     const float DX = 0.01;
 
-    float v = simplex_noise_4d(p) * 2. - 1.;
-    float x = simplex_noise_4d(p + vec4(DX, 0., 0., 0.)) * 2. - 1.;
-    float y = simplex_noise_4d(p + vec4(0., DX, 0., 0.)) * 2. - 1.;
-    float z = simplex_noise_4d(p + vec4(0., 0., DX, 0.)) * 2. - 1.;
-    float w = simplex_noise_4d(p + vec4(0., 0., 0., DX)) * 2. - 1.;
+    float v = simplex_noise_4d(p);
+    float x = simplex_noise_4d(p + vec4(DX, 0., 0., 0.));
+    float y = simplex_noise_4d(p + vec4(0., DX, 0., 0.));
+    float z = simplex_noise_4d(p + vec4(0., 0., DX, 0.));
+    float w = simplex_noise_4d(p + vec4(0., 0., 0., DX));
     return normalize(vec4(v - x, v - y, v - x, v - w));
 }
 
 vec4 curl_fractal_simplex_noise_4d(vec4 p, int iterations) {
     const float DX = 0.01;
 
-    float v = fractal_simplex_noise_4d(p, iterations) * 2. - 1.;
-    float x = fractal_simplex_noise_4d(p + vec4(DX, 0., 0., 0.), iterations) * 2. - 1.;
-    float y = fractal_simplex_noise_4d(p + vec4(0., DX, 0., 0.), iterations) * 2. - 1.;
-    float z = fractal_simplex_noise_4d(p + vec4(0., 0., DX, 0.), iterations) * 2. - 1.;
-    float w = fractal_simplex_noise_4d(p + vec4(0., 0., 0., DX), iterations) * 2. - 1.;
+    float v = fractal_simplex_noise_4d(p, iterations);
+    float x = fractal_simplex_noise_4d(p + vec4(DX, 0., 0., 0.), iterations);
+    float y = fractal_simplex_noise_4d(p + vec4(0., DX, 0., 0.), iterations);
+    float z = fractal_simplex_noise_4d(p + vec4(0., 0., DX, 0.), iterations);
+    float w = fractal_simplex_noise_4d(p + vec4(0., 0., 0., DX), iterations);
     return normalize(vec4(v - x, v - y, v - x, v - w));
 }

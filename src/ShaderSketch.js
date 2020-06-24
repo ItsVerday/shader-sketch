@@ -57,11 +57,11 @@ ${uniform.getUniformDeclaration()}`;
 ${texture.getUniformDeclaration()}`;
         }
 
-        code += Import.resolveCode(this.imports.map(name => Import.getImport(name)));
-        
+        code += "\n" + Import.resolveCode(this.imports.map(name => Import.getImport(name)));
+
         return code;
     }
-    
+
     compileProgram() {
         this.shouldCompileProgram = false;
         

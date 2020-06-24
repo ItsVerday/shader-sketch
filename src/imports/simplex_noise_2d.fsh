@@ -50,17 +50,17 @@ float fractal_simplex_noise_2d(vec2 p, int iterations) {
 vec2 curl_simplex_noise_2d(vec2 p) {
     const float DX = 0.01;
 
-    float v = simplex_noise_2d(p) * 2. - 1.;
-    float x = simplex_noise_2d(p + vec2(DX, 0.)) * 2. - 1.;
-    float y = simplex_noise_2d(p + vec2(0., DX)) * 2. - 1.;
+    float v = simplex_noise_2d(p);
+    float x = simplex_noise_2d(p + vec2(DX, 0.));
+    float y = simplex_noise_2d(p + vec2(0., DX));
     return normalize(vec2(v - x, v - y));
 }
 
 vec2 curl_fractal_simplex_noise_2d(vec2 p, int iterations) {
     const float DX = 0.01;
 
-    float v = fractal_simplex_noise_2d(p, iterations) * 2. - 1.;
-    float x = fractal_simplex_noise_2d(p + vec2(DX, 0.), iterations) * 2. - 1.;
-    float y = fractal_simplex_noise_2d(p + vec2(0., DX), iterations) * 2. - 1.;
+    float v = fractal_simplex_noise_2d(p, iterations);
+    float x = fractal_simplex_noise_2d(p + vec2(DX, 0.), iterations);
+    float y = fractal_simplex_noise_2d(p + vec2(0., DX), iterations);
     return normalize(vec2(v - x, v - y));
 }

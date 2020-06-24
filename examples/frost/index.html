@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Shader-Sketch</title>
+        <style>
+            body {
+                overflow: hidden;
+                padding: 0;
+                margin: 0;
+            }
+
+            shader-sketch {
+                width: 600px;
+                height: 600px;
+            }
+        </style>
+    </head>
+    <body>
+        <shader-sketch id="shader-sketch">
+            <fragment-shader>
+                float frostNoise(vec2 p, vec2 b) {
+                    vec2 curl_1 = curl_fractal_clover_noise_2d(p + 100., 3) * (fractal_clover_noise_2d(p + 200., 2) * .4 + .3);
+                    vec2 p_1 = p + curl_1;
+                    vec2 curl_2 = curl_fractal_clover_noise_2d(p_1 + 300., 4) * (fractal_clover_noise_2d(p_1 + 400., 3) * .1 + .05);
+                    vec2 p_2 = p_1 + curl_2;
+
+                    return fractal_clover_noise_2d(b + curl_2, 5) - fractal_clover_noise_2d(p_1, 3) * .5 + fractal_clover_noise_2d(p, 2) * .3;
+                }
+
+                void main() {
+                    vec2 pos = gl_FragCoord.xy / viewportSize;
+                    float value = frostNoise(pos * 10. + timeElapsed, pos * 5. + timeElapsed * .25);
+
+                    vec3 dark = vec3(.05, .1, .25);
+                    vec3 light = vec3(.2, .6, .9);
+
+                    gl_FragColor = vec4(dark * (1. - value) + light * value, 1.);
+                }
+            </fragment-shader>
+
+            <shader-import name="clover_noise_2d"></shader-import>
+        </shader-sketch>
+
+        <script src="../../dist/shader-sketch.js"></script>
+    </body>
+</html>

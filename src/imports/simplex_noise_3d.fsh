@@ -93,19 +93,19 @@ float fractal_simplex_noise_3d(vec3 p, int iterations) {
 vec3 curl_simplex_noise_3d(vec3 p) {
     const float DX = 0.01;
 
-    float v = simplex_noise_3d(p) * 2. - 1.;
-    float x = simplex_noise_3d(p + vec3(DX, 0., 0.)) * 2. - 1.;
-    float y = simplex_noise_3d(p + vec3(0., DX, 0.)) * 2. - 1.;
-    float z = simplex_noise_3d(p + vec3(0., 0., DX)) * 2. - 1.;
+    float v = simplex_noise_3d(p);
+    float x = simplex_noise_3d(p + vec3(DX, 0., 0.));
+    float y = simplex_noise_3d(p + vec3(0., DX, 0.));
+    float z = simplex_noise_3d(p + vec3(0., 0., DX));
     return normalize(vec3(v - x, v - y, v - x));
 }
 
 vec3 curl_fractal_simplex_noise_3d(vec3 p, int iterations) {
     const float DX = 0.01;
 
-    float v = fractal_simplex_noise_3d(p, iterations) * 2. - 1.;
-    float x = fractal_simplex_noise_3d(p + vec3(DX, 0., 0.), iterations) * 2. - 1.;
-    float y = fractal_simplex_noise_3d(p + vec3(0., DX, 0.), iterations) * 2. - 1.;
-    float z = fractal_simplex_noise_3d(p + vec3(0., 0., DX), iterations) * 2. - 1.;
+    float v = fractal_simplex_noise_3d(p, iterations);
+    float x = fractal_simplex_noise_3d(p + vec3(DX, 0., 0.), iterations);
+    float y = fractal_simplex_noise_3d(p + vec3(0., DX, 0.), iterations);
+    float z = fractal_simplex_noise_3d(p + vec3(0., 0., DX), iterations);
     return normalize(vec3(v - x, v - y, v - z));
 }

@@ -1,5 +1,6 @@
 import ShaderSketch from "./ShaderSketch";
 import Utils from "./Utils";
+import UpdateParentElement from "./UpdateParentElement";
 
 const STYLE =
 `:host {
@@ -59,6 +60,12 @@ class ShaderSketchElement extends HTMLElement {
             this.setUniform("mousePosition", this.getMousePosition(evt));
             this.setUniform("mouseState", 0);
         };
+
+        for (let child of this.childNodes) {
+            if (child instanceof UpdateParentElement) {
+                child.update(this);
+            }
+        }
         
         this.render();
     }
