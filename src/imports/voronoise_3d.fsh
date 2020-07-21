@@ -65,7 +65,7 @@ vec3 curl_voronoise_3d(vec3 p, float u, float v) {
     float x = voronoise_3d(p + vec3(DX, 0., 0.), u, v);
     float y = voronoise_3d(p + vec3(0., DX, 0.), u, v);
     float z = voronoise_3d(p + vec3(0., 0., DX), u, v);
-    return normalize(vec3(val - x, val - y, val - x));
+    return normalize(vec3(val - x, val - y, val - z));
 }
 
 vec3 curl_fractal_voronoise_3d(vec3 p, float u, float v, int iterations) {
