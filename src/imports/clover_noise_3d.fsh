@@ -350,7 +350,7 @@ vec3 curl_clover_noise_3d(vec3 p) {
     float x = clover_noise_3d(p + vec3(DX, 0., 0.));
     float y = clover_noise_3d(p + vec3(0., DX, 0.));
     float z = clover_noise_3d(p + vec3(0., 0., DX));
-    return normalize(vec3(v - x, v - y, v - x));
+    return normalize(vec3(v - x, v - y, v - z));
 }
 
 /**
