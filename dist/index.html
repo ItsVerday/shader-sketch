@@ -37,7 +37,7 @@
 
                 void main() {
                     vec2 pos = gl_FragCoord.xy * .01;
-                    float value = marble_noise(vec3(pos, timeElapsed * 0.2));
+                    float value = marble_noise(vec3(pos, timeElapsed * .2));
 
                     gl_FragColor = vec4(value, value, value, 1.);
                 }
