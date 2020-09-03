@@ -16,37 +16,170 @@
     <body>
         <shader-sketch id="shader-sketch">
             <fragment-shader>
-                float marble_noise(vec3 position) {
-                    vec3 position_2 = position * 0.6;
-                    float d1 = max(1. - abs(fractal_voronoise_3d(position_2 + 100., u, v, 4) - fractal_voronoise_3d(position_2 + 200., u, v, 3)) * 3., 0.);
-                    d1 = d1 * d1 * d1;
-                    d1 *= fractal_voronoise_3d(position_2 + 300., u, v, 2) * 0.3;
-                
-                    vec3 curl_1 = curl_fractal_voronoise_3d(position + 400., u, v, 3) * fractal_voronoise_3d(position + 500., u, v, 2) * 0.05;
-                
-                    vec3 position_3 = position * 1.2;
-                    float d2 = max(1. - abs(fractal_voronoise_3d(position_3 + curl_1 + 600., u, v, 4) - fractal_voronoise_3d(position_3 + curl_1 + 700., u, v, 3)) * 2., 0.);
-                    d2 = d2 * d2 * d2;
-                    d2 *= fractal_voronoise_3d(position_3 + 800., u, v, 2) * 0.5;
-                
-                    float value = 1. - fractal_voronoise_3d(position + 900., u, v, 5);
-                    value = 1. - value * value * value;
-                
-                    return clamp(value - d1 - d2, 0., 1.);
+                float noise_3d_hash(vec3 p) {
+                        return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x - p.z)) * sin(12.0 * p.z - sin(p.x * 10.0))));
                 }
 
+                vec3 noise_3d_hash3d(vec3 p) {
+                        return vec3(noise_3d_hash(p + vec3(0.5, 0, 0)), noise_3d_hash(p + vec3(0, 0.5, 0)), noise_3d_hash(p + vec3(0, 0, 0.5)));
+                }
+                
+                float blaze_noise_3d(vec3 p, float smooth, float jitter) {
+                    float wt = 0.;
+                    float total = 0.;
+                    
+                    vec3 p_floor = floor(p);
+                    vec3 p_fract = fract(p);
+                    
+                    int radius = int(ceil(smooth + jitter - 1.));
+                    float radius_sq = (smooth + jitter + 1.) * (smooth + jitter + 1.);
+                    float reciprocal_smooth = 1. / (smooth * smooth);
+                    
+                    for (int x = 0; x &lt;= 20; x++) {
+                        if (x > radius * 2 + 1) {
+                            break;
+                        }
+                        
+                        int true_x = x - radius;
+                        
+                        for (int y = 0; y &lt;= 20; y++) {
+                            if (y > radius * 2 + 1) {
+                                break;
+                            }
+                            
+                            int true_y = y - radius;
+                            
+                            for (int z = 0; z &lt;= 20; z++) {
+                                if (z > radius * 2 + 1) {
+                                    break;
+                                }
+                                
+                                int true_z = z - radius;
+                                
+                                if (float(true_x * true_x + true_y * true_y + true_z * true_z) > radius_sq) {
+                                    continue;
+                                }
+                                
+                                vec3 true_xyz = vec3(true_x, true_y, true_z);
+                                vec3 p_hash = p_floor + true_xyz;
+                                
+                                vec3 jitter_vec = noise_3d_hash3d(p_hash) * jitter + .5 * (1. - jitter);
+                                vec3 pt = true_xyz + jitter_vec - p_fract;
+                                float dist_sq = dot(pt, pt) * reciprocal_smooth;
+                                if (dist_sq > 1.) {
+                                    continue;
+                                }
+                                
+                                float dist = sqrt(dist_sq);
+                                float weight = smoothstep(1., 0., dist);
+                                float value = noise_3d_hash(p_hash);
+                                
+                                total += value * weight;
+                                wt += weight;
+                            }
+                        }
+                    }
+                    
+                    return total / wt;
+                }
+                
                 void main() {
-                    vec2 pos = gl_FragCoord.xy * .01;
-                    float value = marble_noise(vec3(pos, timeElapsed * .2));
-
-                    gl_FragColor = vec4(value, value, value, 1.);
+                    float value = blaze_noise_3d(vec3(gl_FragCoord.xy / viewportSize * 10., timeElapsed), 1.25, 1.);
+            gl_FragColor = vec4(value, value, value, 1.);
                 }
             </fragment-shader>
+        </shader-sketch>
 
-            <shader-uniform name="u" type="float" value="1"></shader-uniform>
-            <shader-uniform name="v" type="float" value="0.3"></shader-uniform>
+        <!-- BLOOM EFFECT !-->
 
-            <shader-import name="voronoise"></shader-import>
+        <shader-sketch id="bloom-mask">
+            <fragment-shader>
+                float luminance(vec3 rgb) {
+                        return dot(rgb, vec3(0.2125, 0.7154, 0.0721));
+                }
+                
+                void main() {
+            vec3 color = texture2D(texture, vec2(gl_FragCoord.x, viewportSize.y - gl_FragCoord.y) / viewportSize).xyz;
+                    float lum = max((luminance(color) - threshold) * brightness, 0.);
+                    gl_FragColor = vec4(color * lum, 1.);
+                }
+            </fragment-shader>
+            
+            <shader-canvas-texture name="texture" selector="#shader-sketch"></shader-canvas-texture>
+            <shader-uniform name="threshold" type="float" value="0.6"></shader-uniform>
+            <shader-uniform name="brightness" type="float" value="3"></shader-uniform>
+        </shader-sketch>
+
+        <shader-sketch id="bloom-x">
+            <fragment-shader>
+                float norm(float x) {
+                    return exp(x * x * -1.);
+                }
+                
+                void main() {
+                    vec3 total = vec3(0.);
+                    float weight = 0.;
+                    for (int i = 0; i &lt;= 200; i++) {
+                        float x = float(i) - radius * 2.;
+                        if (x > radius * 2.) {
+                            break;
+                        }
+                        
+                        float wt = norm(x / radius);
+                        
+                    vec3 color = texture2D(texture, (vec2(gl_FragCoord.x, viewportSize.y - gl_FragCoord.y) + vec2(x, 0)) / viewportSize).xyz;
+                        total += color * wt;
+                        weight += wt;
+                    }
+                    
+                    gl_FragColor = vec4(total / weight, 1.);
+                }
+            </fragment-shader>
+            
+            <shader-canvas-texture name="texture" selector="#bloom-mask"></shader-canvas-texture>
+            <shader-uniform name="radius" type="float" value="30"></shader-uniform>
+        </shader-sketch>
+
+        <shader-sketch id="bloom-y">
+            <fragment-shader>
+                float norm(float x) {
+                    return exp(x * x * -1.);
+                }
+                
+                void main() {
+                    vec3 total = vec3(0.);
+                    float weight = 0.;
+                    for (int i = 0; i &lt;= 200; i++) {
+                        float x = float(i) - radius * 2.;
+                        if (x > radius * 2.) {
+                            break;
+                        }
+                        
+                        float wt = norm(x / radius);
+                        
+                    vec3 color = texture2D(texture, (vec2(gl_FragCoord.x, viewportSize.y - gl_FragCoord.y) + vec2(0, x)) / viewportSize).xyz;
+                        total += color * wt;
+                        weight += wt;
+                    }
+                    
+                    gl_FragColor = vec4(total / weight, 1.);
+                }
+            </fragment-shader>
+            
+            <shader-canvas-texture name="texture" selector="#bloom-x"></shader-canvas-texture>
+            <shader-uniform name="radius" type="float" value="30"></shader-uniform>
+        </shader-sketch>
+
+        <shader-sketch id="bloom-composite">
+            <fragment-shader>
+                void main() {
+                    vec2 pos = vec2(gl_FragCoord.x, viewportSize.y - gl_FragCoord.y) / viewportSize;
+                    gl_FragColor = vec4(texture2D(original, pos).xyz + texture2D(bloom, pos).xyz, 1.);
+                }
+            </fragment-shader>
+            
+            <shader-canvas-texture name="original" selector="#shader-sketch"></shader-canvas-texture>
+            <shader-canvas-texture name="bloom" selector="#bloom-y"></shader-canvas-texture>
         </shader-sketch>
 
         <script src="shader-sketch.js"></script>

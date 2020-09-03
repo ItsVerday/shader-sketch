@@ -127,7 +127,7 @@ ${texture.getUniformDeclaration()}`;
             const stride = 0;
             const offset = 0;
 
-            const location = this.gl.getAttribLocation(this.program, 'position');
+            const location = this.gl.getAttribLocation(this.program, "position");
 
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
             this.gl.vertexAttribPointer(location, numComponents, type, normalize, stride, offset);
@@ -141,15 +141,14 @@ ${texture.getUniformDeclaration()}`;
         let textureNumber = 0;
         
         for (let texture of this.textures) {
-            if (textureNumber > TEXTURE_NAMES.length) {
+            if (textureNumber >= TEXTURE_NAMES.length) {
                 break;
             }
-
-            texture.update(this.gl);
 
             let textureName = this.gl[TEXTURE_NAMES[textureNumber]];
 
             this.gl.activeTexture(textureName);
+            texture.update(this.gl);
             this.gl.bindTexture(this.gl.TEXTURE_2D, texture.texture);
             this.gl.uniform1i(texture.location, textureNumber);
             textureNumber++;
