@@ -1,0 +1,24 @@
+{
+  "name": "shader-sketch",
+  "version": "1.0.0",
+  "description": "JavaScript Library for creating a user-friendly shader-sketch element in the browser.",
+  "private": true,
+  "scripts": {
+    "build": "npx webpack --config webpack.config.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.14.3",
+    "@babel/preset-env": "^7.14.4",
+    "acorn": "^8.2.4",
+    "babel-loader": "^8.2.2",
+    "minimist": ">=1.2.3",
+    "raw-loader": "^4.0.2",
+    "webpack": "^4.46.0",
+    "webpack-cli": "^3.3.12"
+  },
+  "dependencies": {
+    "regenerator-runtime": "^0.13.7"
+  }
+}

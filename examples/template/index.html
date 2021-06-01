@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Shader-Sketch</title>
+        <style>
+            body {
+                overflow: hidden;
+                padding: 0;
+                margin: 0;
+            }
+
+            shader-sketch {
+                width: 100vw;
+                height: 100vh;
+            }
+        </style>
+    </head>
+    <body>
+        <shader-sketch id="shader-sketch">
+            <fragment-shader>
+                void main() {
+                    gl_FragColor = vec4(gl_FragCoord.xy / viewportSize, 0., 1.);
+                }
+            </fragment-shader>
+        </shader-sketch>
+
+        <script src="../../dist/shader-sketch.js"></script>
+    </body>
+</html>

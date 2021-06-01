@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Bubblegum</title>
+        <style>
+            body {
+                overflow: hidden;
+                padding: 0;
+                margin: 0;
+            }
+
+            shader-sketch {
+                width: 100vw;
+                height: 100vh;
+            }
+        </style>
+    </head>
+    <body>
+        <shader-sketch id="shader-sketch">
+            <fragment-shader>
+                Surface scene(vec3 position) {
+                    float d1 = sdf_sphere(position, vec3(10., 0., 0.), 5.);
+                    d1 += fractal_simplex_noise_4d(vec4(position / 4., timeElapsed * .1), 2) * 2.;
+                    Surface d1_surface = create_surface(0);
+
+                    d1_surface.distance = d1;
+                    d1_surface.diffuse = vec3(.4, 0., .2);
+                    d1_surface.ambient = vec3(.6, 0., .4);
+                    d1_surface.specular = vec3(.7, .5, .6);
+
+                    return d1_surface;
+                }
+                
+                void main() {
+                    vec2 pos = gl_FragCoord.xy / viewportSize;
+
+                    vec3 look = camera_look(map(mousePosition.x, 0., viewportSize.x, -15., 15.), map(mousePosition.y, 0., viewportSize.y, -15., 15.), 90., viewportSize.x / viewportSize.y, pos);
+
+                    const int iterations = 80;
+
+                    RayMarch rayMarch = create_raymarch(vec3(0., 0., 0.), look, iterations);
+
+                    for (int i = 0; i &lt; iterations; i++) {
+                        if (rayMarch.finished) {
+                            break;
+                        }
+
+                        rayMarch = iterate_raymarch(rayMarch, scene(rayMarch.position).distance);
+                    }
+
+                    vec3 color = vec3(0., 0., 0.);
+
+                    if (rayMarch.hit) {
+                        Surface surface = scene(rayMarch.position);
+
+                        vec3 normal = raymarch_normal(
+                            surface.distance,
+                            scene(rayMarch.position + vec3(rayMarch.epsilon, 0., 0.)).distance,
+                            scene(rayMarch.position + vec3(0., rayMarch.epsilon, 0.)).distance,
+                            scene(rayMarch.position + vec3(0., 0., rayMarch.epsilon)).distance
+                        );
+
+                        vec3 lightDirection = vec3(1., 1., 1.);
+
+                        color = surface_color(surface, look, normal, lightDirection);
+                        color *= raymarch_ambient_occlusion(rayMarch, .02);
+                    }
+
+                    gl_FragColor = vec4(color, 1.);
+                }
+            </fragment-shader>
+            <shader-import name="raymarch"></shader-import>
+            <shader-import name="camera"></shader-import>
+            <shader-import name="simplex_noise_4d"></shader-import>
+        </shader-sketch>
+
+        <script src="../../dist/shader-sketch.js"></script>
+    </body>
+</html>
