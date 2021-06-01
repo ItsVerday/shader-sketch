@@ -141,6 +141,9 @@ ${texture.getUniformDeclaration()}`;
         }
         
         this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
+
+        this.bufferCtx.clearRect(0, 0, this.buffer.width, this.buffer.height)
+        this.bufferCtx.drawImage(this.element.canvasElt, 0, 0);
     }
 
     bindTextures() {
