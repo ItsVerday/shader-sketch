@@ -10,9 +10,9 @@ class Texture {
             this.image = this.image.shaderSketch.buffer;
         }
 
-        this.blending = blending || "linear";
-        this.wrapping = wrapping || "clamp";
-        this.shouldUpdate = update || false;
+        this.blending = blending ?? "linear";
+        this.wrapping = wrapping ?? "clamp";
+        this.shouldUpdate = update ?? false;
 
         this.resolutionUniform = new Uniform(`${this.name}_resolution`, "vec2", this.image.width, this.image.height);
 

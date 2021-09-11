@@ -34,6 +34,7 @@ Utils.loadShader = function(gl, type, source) {
         console.error(gl.getShaderInfoLog(shader));
         console.groupCollapsed("Shader Source...");
         console.log(source);
+        console.log(source.split("\n"));
         console.groupEnd();
         console.groupEnd();
         gl.deleteShader(shader);

@@ -1,0 +1,6 @@
+[
+    "perlin_noise",
+    "simplex_noise",
+    "clover_noise",
+    "voronoise"
+]

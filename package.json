@@ -4,7 +4,8 @@
   "description": "JavaScript Library for creating a user-friendly shader-sketch element in the browser.",
   "private": true,
   "scripts": {
-    "build": "npx webpack --config webpack.config.js"
+    "build": "npx webpack --config webpack.config.js",
+    "imports": "node minify_imports.js"
   },
   "author": "",
   "license": "ISC",
@@ -16,7 +17,8 @@
     "minimist": ">=1.2.3",
     "raw-loader": "^4.0.2",
     "webpack": "^4.46.0",
-    "webpack-cli": "^3.3.12"
+    "webpack-cli": "^3.3.12",
+    "webpack-glsl-minify": "^1.4.2"
   },
   "dependencies": {
     "regenerator-runtime": "^0.13.7"

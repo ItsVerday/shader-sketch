@@ -1,6 +1,1 @@
-[
-    "perlin_noise",
-    "simplex_noise",
-    "clover_noise",
-    "voronoise"
-]
+["perlin_noise","simplex_noise","clover_noise","voronoise"]

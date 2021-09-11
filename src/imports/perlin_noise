@@ -1,5 +1,1 @@
-[
-    "perlin_noise_2d",
-    "perlin_noise_3d",
-    "perlin_noise_4d"
-]
+["perlin_noise_2d","perlin_noise_3d","perlin_noise_4d"]
