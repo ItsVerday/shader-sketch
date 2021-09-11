@@ -62,7 +62,7 @@ ${texture.getUniformDeclaration()}`;
 
         code += "\n" + Import.resolveCode(this.imports.map(name => Import.getImport(name)));
 
-        code += "\n// BEGIN USER CODE //";
+        code += "\n" + Utils.BEGIN_USER_CODE;
 
         return code;
     }

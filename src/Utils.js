@@ -30,19 +30,147 @@ Utils.loadShader = function(gl, type, source) {
     gl.compileShader(shader);
 
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        console.groupCollapsed("Shader Sketch Shader Compilation Error");
-        console.error(gl.getShaderInfoLog(shader));
+        let errors = gl.getShaderInfoLog(shader);
+        Utils.shaderError(source, errors);
+
+        console.groupCollapsed("(Advanced info)");
+        console.error(errors);
         console.groupCollapsed("Shader Source...");
         console.log(source);
-        console.log(source.split("\n"));
         console.groupEnd();
         console.groupEnd();
+        console.groupEnd();
+
         gl.deleteShader(shader);
 
         return null;
     }
 
     return shader;
+}
+
+Utils.BEGIN_USER_CODE = "// BEGIN USER CODE //";
+
+Utils.shaderError = function( source, errors) {
+    let code = source.split("\n");
+    errors = errors.split("\n");
+    errors.splice(errors.length - 1, 1);
+
+    let userCodeStart = 0;
+    for (let i = 0; i < code.length; i++) {
+        if (code[i] === Utils.BEGIN_USER_CODE) {
+            userCodeStart = i;
+            break;
+        }
+    }
+
+    let errorData = [];
+    let globalErrors = [];
+
+    for (let error of errors) {
+        const regex = /ERROR: \d+:(\d+): (.*)/i;
+        const match = regex.exec(error);
+
+        if (match === null) {
+            const newRegex = /ERROR: (.*)/i;
+            const newMatch = newRegex.exec(error);
+
+            globalErrors.push({
+                message: newMatch[1]
+            });
+
+            continue;
+        }
+
+        errorData.push({
+            line: parseInt(match[1]) - 1,
+            message: match[2]
+        });
+    }
+
+    let shaderSketchErrors = [];
+    let userErrors = [];
+
+    for (let error of errorData) {
+        if (error.line <= userCodeStart) {
+            shaderSketchErrors.push(error);
+        } else {
+            userErrors.push(error);
+        }
+    }
+
+    console.group("Shader Sketch Shader Compilation Error");
+    if (shaderSketchErrors.length > 0) {
+        console.error(`${shaderSketchErrors.map(({line, message}) => `INTERNAL ERROR @ LINE ${line}: ${message}`).join("\n")}`);
+        console.warn("These errors are internal errors from shader-sketch itself, and are not your fault! Please report this at https://github.com/ValgoBoi/shader-sketch/issues/new with as much detail as possible, including your code and this error message!");
+    }
+
+    if (userErrors.length > 0 || globalErrors.length > 0) {
+        let includeLines = [];
+
+        for (let i = 0; i < code.length; i++) {
+            includeLines.push(false);
+        }
+
+        const RADIUS = 2;
+        for (let userError of userErrors) {
+            for (let offset = -RADIUS; offset <= RADIUS; offset++) {
+                let trueLine = offset + userError.line;
+                if (trueLine < 0 || trueLine >= code.length) continue;
+                includeLines[trueLine] = true;
+            }
+        }
+        
+        let messageComponents = [];
+        for (let globalError of globalErrors) {
+            messageComponents.push({
+                message: `GLOBAL ERROR: ${globalError.message}\n`,
+                color: "#FF0000"
+            });
+        }
+
+        let previousInclude = true;
+        for (let i = 0; i < includeLines.length; i++) {
+            let include = includeLines[i];
+
+            if (include) {
+                messageComponents.push({
+                    message: `${(i - userCodeStart).toString().padEnd(2, " ")} | `,
+                    color: "#0033FF"
+                });
+
+                messageComponents.push({
+                    message: `${code[i]}\n`,
+                    color: "#111111"
+                });
+
+                for (let userError of userErrors) {
+                    if (userError.line !== i) continue;
+
+                    messageComponents.push({
+                        message: `   | `,
+                        color: "#0033FF"
+                    });
+
+                    messageComponents.push({
+                        message: `ERROR: ${userError.message}\n`,
+                        color: "#FF0000"
+                    });
+                }
+            } else {
+                if (previousInclude === true) {
+                    messageComponents.push({
+                        message: "...\n",
+                        color: "#888888"
+                    });
+                }
+            }
+
+            previousInclude = include;
+        }
+
+        console.log(messageComponents.map(({message}) => `%c${message}`).join(""), ...messageComponents.map(({color}) => `color: ${color};`));
+    }
 }
 
 Utils.removeAll = function(string, remove) {
