@@ -62,6 +62,8 @@ ${texture.getUniformDeclaration()}`;
 
         code += "\n" + Import.resolveCode(this.imports.map(name => Import.getImport(name)));
 
+        code += "\n// BEGIN USER CODE //";
+
         return code;
     }
 
@@ -71,7 +73,7 @@ ${texture.getUniformDeclaration()}`;
         let fragmentShader = DEFAULT_FRAGMENT_SHADER;
         
         if (this.element.fragmentShaderElt != null) {
-            fragmentShader = this.element.fragmentShaderElt.textContent;
+            fragmentShader = this.element.getFragmentShaderCode();
         }
         
         fragmentShader = this.getExtraFragmentCode() + "\n" + fragmentShader;

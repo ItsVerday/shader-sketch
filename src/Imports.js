@@ -21,10 +21,7 @@ class Import {
     }
 
     getCode() {
-        return `// --------------------
-// Import: ${this.name}
-// --------------------
-
+        return `// IMPORT: ${this.name}
 ${this.code}
 `;
     }

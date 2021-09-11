@@ -204,6 +204,42 @@ class ShaderSketchElement extends HTMLElement {
         
         this.shaderSketch.render();
     }
+
+    getFragmentShaderCode() {
+        if (this.fragmentShaderElt === null) {
+            return null;
+        }
+
+        let code = this.fragmentShaderElt.textContent.split("\n");
+
+        let minimumTabSize = Infinity;
+
+        for (let i = 0; i < code.length; i++) {
+            if (code[i].length === 0) continue;
+
+            while (code[i] !== (code[i] = code[i].replace("\t", "    "))) {}
+
+            for (let j = 0; j < code[i].length; j++) {
+                if (code[i][j] !== " ") {
+                    if (minimumTabSize > j) minimumTabSize = j;
+                    break;
+                }
+            }
+        }
+
+        if (minimumTabSize !== Infinity) {
+            for (let i = 0; i < code.length; i++) {
+                if (code[i].length === 0) continue;
+
+                code[i] = code[i].substring(minimumTabSize);
+            }
+        }
+
+        if (code[0].length === 0) code.splice(0, 1);
+        if (code[code.length - 1].length === 0) code.splice(code.length - 1, 1);
+
+        return code.join("\n");
+    }
     
     updateSize() {
         this.rect = this.getBoundingClientRect();
